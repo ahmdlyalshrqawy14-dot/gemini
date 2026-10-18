@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 7 * * *' # 12:30 PM IST daily
   workflow_dispatch:
+    inputs:
+      topic:
+        description: 'Custom Video Topic (Leave empty to use content_plan.json)'
+        required: false
+        default: ''
 
 # A run takes far longer than the gap between a manual dispatch and the daily
 # schedule, so serialise them — two runs pushing to main race each other.
@@ -56,7 +61,8 @@ jobs:
         continue-on-error: true
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          TOPIC: ${{ github.event.inputs.topic }}
         run: python main.py
 
       - name: 🔎 Upload Audio Artifact for Debugging
@@ -76,7 +82,7 @@ jobs:
       - name: 🎞️ Generate demo GIF from latest video
         if: steps.production-run.outcome == 'success'
         run: |
-          VIDEO=$(ls output/long_video_*.mp4 2>/dev/null | head -n 1)
+          VIDEO=$(ls output/final_video_*.mp4 2>/dev/null | head -n 1)
           if [ -n "$VIDEO" ]; then
             echo "✅ Found video: $VIDEO — converting to GIF..."
             ffmpeg -y -ss 0 -t 12 -i "$VIDEO" \

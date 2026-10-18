@@ -4,15 +4,9 @@ google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
 
-# Text-to-Speech and Video Editing
-gTTS
-moviepy==1.0.3
+# Modern Voice Synthesis
+edge-tts
 
-# For Pexels API
+# HTTP Requests
 requests
-
-# For image processing (e.g., slides, thumbnails)
-Pillow==9.5.0
-
-# ✅ For MP3 to WAV conversion
-pydub
+Pillow
