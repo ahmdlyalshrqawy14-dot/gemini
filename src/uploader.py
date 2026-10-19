@@ -38,8 +38,14 @@ def get_authenticated_service():
             # This is the part that runs on your local computer the very first time.
             print("INFO: No valid credentials found. Starting new authentication flow...")
             if not CLIENT_SECRETS_FILE.exists():
-                raise FileNotFoundError(f"CRITICAL ERROR: {CLIENT_SECRETS_FILE} not found. Please download it from Google Cloud Console.")
+                print(f"⚠️ {CLIENT_SECRETS_FILE} not found. Skipping YouTube authentication.")
+                return None
             
+            # Only attempt local server flow if we appear to be interactive
+            if 'CI' in os.environ or 'GITHUB_ACTIONS' in os.environ:
+                print("⚠️ In CI environment without valid refresh token. Skipping interactive auth.")
+                return None
+
             flow = InstalledAppFlow.from_client_secrets_file(str(CLIENT_SECRETS_FILE), scopes=YOUTUBE_UPLOAD_SCOPE)
             
             # This command will start a local server, open your browser,
@@ -60,6 +66,9 @@ def upload_to_youtube(video_path, title, description, tags, thumbnail_path=None)
     print(f"⬆️ Uploading '{video_path}' to YouTube...")
     try:
         youtube = get_authenticated_service()
+        if not youtube:
+            print("⚠️ Skipping upload due to missing or invalid YouTube credentials.")
+            return None
         
         request_body = {
             'snippet': {
